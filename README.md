@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpaceX Launches - Frontend Homework Assignment
+
+This is a Next.js project built with TypeScript that displays SpaceX launch data from the public SpaceX API. The app not only shows details about each launch but also lets you update the launch cost and payload type with optimistic UI updates. Plus, it supports multi-tab syncing and persists changes across page refreshes.
+
+## Features
+
+- **Launch List**: Displays a list of SpaceX launches with:
+
+  - Mission name
+  - Flight number
+  - Launch date
+  - Payload count (only counting Satellite payloads – always 1 or 0)
+  - Time elapsed since launch (in hours)
+  - Cost per launch
+
+- **Total Cost**: Shows the total cost of all launches at the top.
+
+- **Optimistic Updates**: Update launch cost and payload type with immediate UI feedback. If an update fails, you'll be prompted to confirm a rollback.
+
+- **Multi-Tab Sync**: Changes are broadcast to other open tabs using the Broadcast Channel API.
+
+- **Persistent Changes**: Updates are saved in local storage so that they remain even after a page refresh.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Node.js](https://nodejs.org) installed on your machine.
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd <repository-folder>
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### Running the Development Server
+
+Start the server with:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000 in your browser to see the app in action.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build the project:
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+Run the production server:
+
+```bash
+npm start
+# or
+yarn start
+```
+
+## About the Assignment
+
+This assignment was to create a frontend application that:
+
+- Retrieves and displays SpaceX launch data (using https://api.spacexdata.com/v3/launches)
+- Calculates and shows details such as mission name, flight number, launch date, payload count (only Satellite payloads), elapsed time in hours, and cost per launch
+- Displays the total cost of all launches at the top
+- Allows you to update launch cost and payload type. These updates use an optimistic update strategy so the UI responds immediately
+- In our mocked API calls, updates take 5 seconds and then throw an error—at which point the app prompts you to revert the changes
+- Keeps changes in sync across multiple browser tabs using the Broadcast Channel API
+- Persists changes across page refreshes using the Web Storage API
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [Next.js Documentation](https://nextjs.org/docs) – Learn about Next.js features and API
+- [Learn Next.js](https://nextjs.org/learn) – A hands-on tutorial
+- [SpaceX API Docs](https://github.com/r-spacex/SpaceX-API) – Details about the API used in this project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Feedback
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Feel free to open issues or submit pull requests if you have any suggestions or improvements.

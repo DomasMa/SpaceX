@@ -1,101 +1,95 @@
-import Image from "next/image";
+'use client'
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useGetLaunches } from '@/hooks/useGetLaunches'
+import LaunchCard from '@/components/launchCard'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import LaunchCardSkeleton from '@/components/launchCard/skeleton'
+import { launchesChannel, BroadcastMessage } from '@/lib/broadcast'
+import { LaunchesQueryData } from '@/types/launches'
 
-export default function Home() {
+const LaunchesPage = () => {
+  const { data, isLoading, error } = useGetLaunches()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent<BroadcastMessage>) => {
+      if (event.data.type === 'COST_UPDATE') {
+        const { rocketId, cost } = event.data
+        queryClient.setQueryData<LaunchesQueryData>(['launches'], (currentData) => {
+          if (!currentData) return currentData
+
+          const updatedLaunches = currentData.launches.map((launch) =>
+            launch.rocket_id === rocketId ? { ...launch, rocket_cost: cost } : launch
+          )
+
+          const updatedTotalCost = updatedLaunches.reduce(
+            (sum, launch) => sum + launch.rocket_cost,
+            0
+          )
+
+          return {
+            launches: updatedLaunches,
+            totalCost: updatedTotalCost,
+          }
+        })
+      }
+
+      if (event.data.type === 'PAYLOAD_UPDATE') {
+        const { payloadId, payloadType } = event.data
+        queryClient.setQueryData<LaunchesQueryData>(['launches'], (currentData) => {
+          if (!currentData) return currentData
+
+          const updatedLaunches = currentData.launches.map((launch) => {
+            if (launch.payload_id === payloadId) {
+              return {
+                ...launch,
+                payload_type: payloadType,
+                satellite_count: payloadType === 'Satellite' ? 1 : 0,
+              }
+            }
+            return launch
+          })
+
+          return {
+            launches: updatedLaunches,
+            totalCost: currentData.totalCost,
+          }
+        })
+      }
+    }
+
+    launchesChannel.addEventListener('message', handleMessage)
+    return () => {
+      launchesChannel.removeEventListener('message', handleMessage)
+    }
+  }, [queryClient])
+
+  if (isLoading) return <LaunchCardSkeleton />
+  if (error) return window.alert('An error occurred: ' + error.message)
+  if (!data) return null
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="p-8 max-w-6xl mx-auto">
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-3xl text-center">SpaceX Launches</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xl text-center text-muted-foreground">
+            Total Launch Cost: ${data.totalCost.toLocaleString()}
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {data.launches.map((launch) => (
+          //Cannot use flight_number as key because there's a mistake in the launch data and there are two launches with id=110
+          <LaunchCard key={`${launch.flight_number}-${launch.mission_name}`} launch={launch} />
+        ))}
+      </div>
     </div>
-  );
+  )
 }
+
+export default LaunchesPage
