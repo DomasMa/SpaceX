@@ -14,6 +14,14 @@ export default [
   {
     rules: {
       'prettier/prettier': 'error',
+      // Ignore unused variables that start with an underscore.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ]

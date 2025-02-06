@@ -43,10 +43,22 @@ export const useUpdateLaunchCost = () => {
 
       return { previousData }
     },
-    onError: (error, variables, context) => {
+    onError: (error, variables: { rocketId: string; cost: number }, context) => {
       if (confirm('Failed to update cost. Do you want to revert the changes?')) {
         if (context?.previousData) {
-          queryClient.setQueryData(['launches'], context.previousData)
+          queryClient.setQueryData<LaunchesQueryData>(['launches'], context.previousData)
+          const previousLaunch = context.previousData.launches.find(
+            (launch) => launch.rocket_id === variables.rocketId
+          )
+          const previousCost = previousLaunch?.rocket_cost
+
+          if (previousCost !== undefined) {
+            launchesChannel.postMessage({
+              type: 'COST_UPDATE',
+              rocketId: variables.rocketId,
+              cost: previousCost,
+            })
+          }
         }
       }
     },

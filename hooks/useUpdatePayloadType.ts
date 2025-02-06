@@ -54,6 +54,18 @@ export const useUpdatePayloadType = () => {
       if (confirm('Failed to update payload type. Do you want to revert the changes?')) {
         if (context?.previousData) {
           queryClient.setQueryData(['launches'], context.previousData)
+          const previousLaunch = context.previousData.launches.find(
+            (launch) => launch.payload_id === variables.payloadId
+          )
+          const previousType = previousLaunch?.payload_type
+
+          if (previousType !== undefined) {
+            launchesChannel.postMessage({
+              type: 'PAYLOAD_UPDATE',
+              payloadId: variables.payloadId,
+              payloadType: previousType,
+            })
+          }
         }
       }
     },
